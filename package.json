@@ -9,5 +9,7 @@
   "name": "rest-api",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": "https://github.com/Siehan/rest-api.git",
+  "author": "Siehan <memain.ye.sylvie@gmail.com>"
 }
