@@ -34,6 +34,7 @@ exports.register = async (username, email) => {
         },
       },
     });
+    console.log(result);
 
     return await prisma.user.findUnique({
       where: {
@@ -66,7 +67,6 @@ exports.getUserByApiKey = async (apiKey) => {
         },
       },
     });
-
     /* 2eme alternative: result est différent
     const result =  await prisma.apiKey.findUnique({
       where: {
@@ -76,23 +76,31 @@ exports.getUserByApiKey = async (apiKey) => {
         user: true,
       },
     })*/
-    /* 3eme alternative: Ne fonctionne pas???
-    const result = await prisma.user.findMany({
-      select: {
-        username: true,
-        apiKey: {
-          where: {
-            key: apiKey,
-          },
-          select: {
-            key: true,
-          },
-        },
-      },
-    })*/
     return result;
   } catch (e) {
     customizeError(e);
     throw e;
   }
+};
+
+exports.getUserById = async (userId) => {
+  try {
+    const result = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    return result;
+  } catch (e) {
+    customizeError(e);
+    throw e;
+  }
+};
+
+exports.getUserByUsername = async (username) => {
+  // A implementer
+};
+
+exports.sendMessage = async (srcId, dstId, content) => {
+  // A Implementer
 };

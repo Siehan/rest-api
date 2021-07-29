@@ -2,7 +2,6 @@ const express = require("express");
 const db = require("./mydb");
 
 const IP = "192.168.0.24";
-// le port d'écoute du serveur
 const PORT = 3333;
 
 const app = express();
@@ -30,9 +29,9 @@ const getApiKey = async (req, res, next) => {
 const validateApiKey = async (req, res, next) => {
   try {
     const result = await db.getUserByApiKey(req.apiKey);
-    console.log(result);
+    // Check if user is active
     // check if null result then not found
-    if (!result) {
+    if (!result || !result.active) {
       res.status(403).json({ status: "fail", data: { key: "Invalid api key" } });
     } else {
       req.userId = result.id;
@@ -69,12 +68,51 @@ app.post("/register", async (req, res) => {
 app.use(getApiKey);
 app.use(validateApiKey);
 
-app.get("/getUserById/:userId", async (req, res) => {
+app.get("/user_by_id/:userId", async (req, res) => {
+  let userId = req.params.userId;
+  if (isNaN(userId)) {
+    res.json({ status: "fail", data: { userId: `${userId} is not a number` } });
+    return;
+  }
+  userId = Number(userId);
+  try {
+    const result = await db.getUserById(userId);
+    res.json({ status: "success", data: { user: result } });
+  } catch (e) {
+    if (e.status === "fail") {
+      res.status(400).json({ status: e.status, data: e.dataError });
+    } else {
+      // e.status === 50X
+      res.status(500).json({ status: e.status, message: e.message });
+    }
+  }
+});
+
+app.get("/myinfo", async (req, res) => {
+  const userId = req.userId;
+  try {
+    const result = await db.getUserById(userId);
+    res.json({ status: "success", data: { user: result } });
+  } catch (e) {
+    if (e.status === "fail") {
+      res.status(400).json({ status: e.status, data: e.dataError });
+    } else {
+      // e.status === 50X
+      res.status(500).json({ status: e.status, message: e.message });
+    }
+  }
+});
+
+app.get("/user_by_username/:username", async (req, res) => {
   // A implementer
 });
 
-app.get("/myInfo", async (req, res) => {
-  // A implémenter
+app.post("/send_message/:username", async (req, res) => {
+  // A implementer
+});
+
+app.get("/read_message/", async (req, res) => {
+  // A implementer
 });
 
 app.listen(PORT, IP, () => {
