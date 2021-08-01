@@ -9,7 +9,7 @@ const customizeError = (e) => {
     e.dataError = {};
     switch (e.code) {
       case "P2002":
-        e.dataError[e.meta.target[0]] = `${e.meta.target[0]} already exists`;
+        e.dataError[e.meta.target[0]] = `Sorry but this ${e.meta.target[0]} already exists`;
         break;
       default:
         e.dataError[e.meta.target[0]] = e.message;
@@ -98,9 +98,112 @@ exports.getUserById = async (userId) => {
 };
 
 exports.getUserByUsername = async (username) => {
-  // A implementer
+  // A implémenter
+  try {
+    const result = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+    return result;
+  } catch (e) {
+    customizeError(e);
+    throw e;
+  }
 };
 
 exports.sendMessage = async (srcId, dstId, content) => {
-  // A Implementer
+  // A Implémenter
+  try {
+    const result = await prisma.message.create({
+      data: {
+        srcId: srcId,
+        content: content,
+        dstId: dstId,
+      },
+    });
+    return result;
+  } catch (e) {
+    customizeError(e);
+    throw e;
+  }
 };
+
+exports.readMessage = async (user1Id, user2Id) => {
+  // A Implémenter
+  try {
+    return await prisma.message.findMany({
+      // par exemple: SELECT * FROM message WHERE src_id = 3 AND dst_id = 1 OR src_id = 1 AND dst_id = 3 ORDER BY created_at ASC;
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                srcId: user1Id,
+              },
+              {
+                dstId: user2Id,
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                srcId: user2Id,
+              },
+              {
+                dstId: user1Id,
+              },
+            ],
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      select: {
+        srcId: true,
+        dstId: true,
+        content: true,
+        createdAt: true,
+      },
+    });
+  } catch (e) {
+    customizeError(e);
+    throw e;
+  }
+};
+
+exports.deleteUserById = async (id) => {
+  try {
+    const result = await prisma.user.delete({
+      where: {
+        id: id,
+      },
+    });
+    return result;
+  } catch (e) {
+    customizeError(e);
+    throw e;
+  }
+};
+
+/*
+exports.deleteUser = async (username, email) => {
+  try {
+    const result = await prisma.user.delete({
+      where: {
+        email: "email",
+      },
+      select: {
+        email: true,
+        username: true,
+      },
+    });
+    return result;
+  } catch (e) {
+    customizeError(e);
+    throw e;
+  }
+};
+*/
